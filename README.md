@@ -17,9 +17,7 @@ A custom linear layer is implemented where each weight is associated with a lear
 For a given weight matrix `W`, a corresponding gate score matrix `S` is introduced. The effective weights are computed as:
 
 ```
-
 W' = W * sigmoid(S)
-
 ```
 
 Where:
@@ -35,9 +33,7 @@ This allows the model to continuously learn which connections are useful.
 The loss function is defined as:
 
 ```
-
 Total Loss = CrossEntropyLoss + λ * sum(gates)
-
 ```
 
 Where:
@@ -54,10 +50,10 @@ This encourages the network to drive unnecessary gates toward zero.
 The model uses a hybrid architecture:
 
 - Convolutional layers for feature extraction  
-- Custom prunable linear layers for classification and sparsity learning  
+- Custom prunable linear layers for classification and sparsity learning
+- The prunable layers introduce learnable gates that dynamically suppress unimportant connections during training.
 
 ```
-
 Input (32×32×3)
 ↓
 Convolutional Layers
@@ -69,10 +65,10 @@ Prunable Linear Layer
 Prunable Linear Layer
 ↓
 Output (10 classes)
-
 ```
 
-<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/bf011de7-d28c-438d-861e-d722cb0a38f3" />
+![Architecture](https://github.com/user-attachments/assets/bf011de7-d28c-438d-861e-d722cb0a38f3)
+*Figure: Model architecture showing convolutional backbone and prunable layers.*
 
 
 ---
@@ -97,7 +93,11 @@ Evaluation Metrics:
 | 5e-6   | 75.47%  | 43.66%   |
 | 1e-5   | 73.25%  | 45.23%   |
 
-> <img width="669" height="568" alt="image" src="https://github.com/user-attachments/assets/093d3b48-c4a2-461b-a1e1-4efd81d74467" />
+The best-performing model (λ = 1e-6) achieves 76.11% accuracy while pruning 34.68% of parameters.
+
+<img width="669" height="568" alt="image" src="https://github.com/user-attachments/assets/093d3b48-c4a2-461b-a1e1-4efd81d74467" />
+
+The trade-off curve shows a gradual decline in accuracy as sparsity increases, indicating that moderate pruning does not significantly harm performance.
 
 
 ---
@@ -118,7 +118,11 @@ The distribution of gate values shows:
 - A concentration near zero, representing pruned connections  
 - A smaller subset of gates remaining active, representing important weights  
 
-This confirms that pruning is learned rather than random.
+This distribution indicates effective sparsification:
+- A dominant spike near zero shows a large number of connections have been suppressed
+- A secondary distribution away from zero corresponds to important retained weights
+
+This bimodal pattern confirms that the model learns structured sparsity rather than uniformly shrinking weights.
 
 <img width="752" height="565" alt="image" src="https://github.com/user-attachments/assets/4a19dc5c-6c5f-42b6-83ed-0cd10914374f" />
 
@@ -133,47 +137,68 @@ This confirms that pruning is learned rather than random.
 
 ---
 
-## Repository Structure
-
-```
-
-.
-├── notebook.ipynb
-├── README.md
-├── requirements.txt
-└── assets/
-
-```
-
----
 
 ## How to Run
 
-Clone the repository:
+This project is implemented as a notebook and can be run on Kaggle, Google Colab, or locally.
+
+---
+
+### Option 1: Run on Kaggle (Recommended)
+
+1. Open the notebook on Kaggle  
+2. Enable GPU (optional but recommended)  
+3. Run all cells  
+
+> The notebook includes dataset loading and all required dependencies.
+
+---
+
+### Option 2: Run on Google Colab
+
+1. Upload the notebook (`self-pruning-neural-networks-layer.ipynb`) to Colab  
+2. Enable GPU:
+   - Runtime → Change runtime type → GPU  
+3. Install required dependencies (if needed):
 
 ```
-
-git clone [[https://github.com/](https://github.com/)<your-username](https://github.com/Mohammed0Arfath/Self-Pruning-Neural-Network)>
-cd <Self-Pruning-Neural-Network>
-
+pip install torch torchvision
 ```
 
-Install dependencies:
+4. Run all cells  
 
+---
+
+### Option 3: Run Locally
+
+1. Download the notebook:
+```
+self-pruning-neural-networks-layer.ipynb
 ```
 
-pip install -r requirements.txt
-
+2. Open using Jupyter Notebook or VS Code:
 ```
-
-Run the notebook:
-
-```
-
 jupyter notebook
-
 ```
 
+3. Ensure the following dependencies are installed:
+
+- Python 3.x  
+- PyTorch  
+- torchvision  
+- NumPy  
+- matplotlib  
+
+---
+
+## Repository Structure
+
+```
+.
+├── self-pruning-neural-networks-layer.ipynb
+└── README.md
+
+```
 ---
 
 ## Future Work
@@ -182,13 +207,5 @@ jupyter notebook
 - Explore L0 regularization for sharper sparsity  
 - Evaluate inference speed improvements after pruning  
 - Compare with magnitude-based pruning methods  
-
----
-
-## Author
-
-Arfath  
-AI/ML Engineering Student
-```
 
 ---

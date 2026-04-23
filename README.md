@@ -67,7 +67,7 @@ Prunable Linear Layer
 Output (10 classes)
 ```
 
-![Architecture](https://github.com/user-attachments/assets/bf011de7-d28c-438d-861e-d722cb0a38f3)
+![Architecture](https://github.com/user-attachments/assets/d8b7ad50-8035-40db-8365-104731ded272)
 *Figure: Model architecture showing convolutional backbone and prunable layers.*
 
 

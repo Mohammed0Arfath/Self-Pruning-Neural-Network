@@ -242,9 +242,4 @@ jupyter notebook
 - Evaluate inference speed improvements after pruning  
 - Compare with magnitude-based pruning methods  
 
----
 
-## Author
-
-Arfath  
-AI/ML Engineering Student

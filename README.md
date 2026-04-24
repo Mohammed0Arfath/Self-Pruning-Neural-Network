@@ -123,7 +123,9 @@ These results demonstrate a clear and consistent sparsity–accuracy trade-off a
 This shows that nearly **half of the network connections can be removed** with only a small reduction in performance.
 
 ![Tradeoff](https://github.com/user-attachments/assets/3d90df7e-c37c-4cee-b3cd-768b80ffe73a)
+
 *Figure: Accuracy vs Sparsity trade-off across different λ values.*
+
 ---
 
 ## Analysis
@@ -155,7 +157,8 @@ This behavior is a direct consequence of the L1 penalty:
 This results in a **bimodal distribution**, demonstrating structured sparsity rather than uniform shrinkage.
 
 ![Gates](https://github.com/user-attachments/assets/6f6739a0-a4d9-4e46-91c9-01c6cc16b307)
-*Figure: Gate value distribution showing pruned vs active connections.*
+
+*Figure: Gate value distribution showing pruned vs active connections*
 
 ---
 

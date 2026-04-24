@@ -37,15 +37,15 @@ Input: CIFAR-10 (3 × 32 × 32)
        │
 ┌──────▼─────────────────────────────────┐
 │  CNN Feature Extractor (standard)      │
-│  Conv2d(3→32, k=3) + ReLU + MaxPool   │  32×32 → 16×16
-│  Conv2d(32→64, k=3) + ReLU + MaxPool  │  16×16 → 8×8
-│  Conv2d(64→128, k=3) + ReLU + MaxPool │  8×8   → 4×4
+│  Conv2d(3→32, k=3) + ReLU + MaxPool    │  32×32 → 16×16
+│  Conv2d(32→64, k=3) + ReLU + MaxPool   │  16×16 → 8×8
+│  Conv2d(64→128, k=3) + ReLU + MaxPool  │  8×8   → 4×4
 └──────────────────┬─────────────────────┘
                    │  flatten → 2048
 ┌──────────────────▼─────────────────────┐
 │  Prunable Classifier Head              │
-│  PrunableLinear(2048 → 256) + ReLU    │  ← gate parameters here
-│  PrunableLinear(256 → 10)             │  ← gate parameters here
+│  PrunableLinear(2048 → 256) + ReLU     │  ← gate parameters here
+│  PrunableLinear(256 → 10)              │  ← gate parameters here
 └──────────────────┬─────────────────────┘
                    │
              10-class logits
@@ -55,6 +55,7 @@ Input: CIFAR-10 (3 × 32 × 32)
 - `fc1`: 256 × 2048 = 524,288 gates  
 - `fc2`: 10 × 256 = 2,560 gates
 
+![Architecture](https://github.com/user-attachments/assets/d8b7ad50-8035-40db-8365-104731ded272)
 ---
 
 ## 3. Implementation Details

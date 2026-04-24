@@ -161,34 +161,7 @@ Both layers prune at similar rates, showing the L1 penalty distributes pruning u
 
 ---
 
-## 6. Compliance Checklist
-
-| # | Requirement | Status | Implementation |
-|:---:|:---|:---:|:---|
-| 1 | `PrunableLinear(in_features, out_features)` class | ✅ | Cell 8 |
-| 2 | Standard `weight` and `bias` as `nn.Parameter` | ✅ | `torch.randn * 0.02`, `torch.zeros` |
-| 3 | `gate_scores` same shape as `weight`, registered as parameter | ✅ | `torch.randn(...) - 2.0` |
-| 4 | Sigmoid applied to `gate_scores` → gates ∈ (0,1) | ✅ | `torch.sigmoid(self.gate_scores)` |
-| 5 | `pruned_weights = weight * gates` (element-wise) | ✅ | `self.weight * gates` |
-| 6 | Linear op using `pruned_weights` and `bias` | ✅ | `F.linear(x, pruned_weights, self.bias)` |
-| 7 | Gradients flow through both `weight` and `gate_scores` | ✅ | Both are `nn.Parameter`; chain rule verified |
-| 8 | SparsityLoss = L1 norm of all gate values | ✅ | `torch.sum(m.gate_values())` across all layers |
-| 9 | Total Loss = ClassificationLoss + λ × SparsityLoss | ✅ | `cls_loss + lambda_val * sp_loss` |
-| 10 | Optimizer updates all parameters including `gate_scores` | ✅ | `Adam(model.parameters())` |
-| 11 | CIFAR-10 via `torchvision.datasets` | ✅ | Train: 50,000 · Test: 10,000 |
-| 12 | Sparsity level = % of gates below threshold (1e-2) | ✅ | `compute_sparsity()` — Cell 11 |
-| 13 | Final test accuracy reported per λ | ✅ | Cell 14 output |
-| 14 | At least 3 different λ values compared | ✅ | 6 values tested (1e-6 to 5e-3) |
-| 15 | Markdown report with L1 sparsity explanation | ✅ | This document (Section 1) |
-| 16 | Results table: Lambda · Test Accuracy · Sparsity Level | ✅ | Section 4 |
-| 17 | matplotlib plot of gate value distribution for best model | ✅ | Cell 17 — λ=1e-6 |
-| 18 | Bimodal distribution: spike at 0 + cluster away from 0 | ✅ | 35.06% pruned, 64.94% active |
-
-**All 18 deliverables satisfied.**
-
----
-
-## 7. Conclusion
+## 6. Conclusion
 
 The Self-Pruning Neural Network successfully demonstrates that a network can learn to prune itself during training via learnable sigmoid gates and an L1 sparsity regularizer.
 
@@ -197,6 +170,3 @@ The Self-Pruning Neural Network successfully demonstrates that a network can lea
 **What this demonstrates:** The L1 sparsity mechanism is both theoretically principled and practically effective. The gate distributions confirm genuine pruning — gates commit to near-zero or near-one values rather than clustering at intermediate levels. In a production setting, the pruned architecture could be physically extracted (zeroed connections removed) for faster inference and lower memory footprint without any retraining.
 
 ---
-
-*Generated from notebook: `self-pruning-neural-networks-layer.ipynb`*  
-*All metrics taken directly from notebook cell outputs.*

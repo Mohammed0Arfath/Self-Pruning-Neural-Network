@@ -1,4 +1,6 @@
+
 # Self-Pruning Neural Network on CIFAR-10
+[![Kaggle](https://img.shields.io/badge/Kaggle-Notebook-blue)](https://www.kaggle.com/code/mohammedarfathr/self-pruning-neural-networks-layer)
 
 ## Overview
 
@@ -21,8 +23,8 @@ W' = W * sigmoid(S)
 ```
 
 Where:
-- `sigmoid` ensures gate values lie between 0 and 1
-- Gate values control the importance of each connection
+- `sigmoid` ensures gate values lie between 0 and 1  
+- Gate values control the importance of each connection  
 
 This allows the model to continuously learn which connections are useful.
 
@@ -37,9 +39,9 @@ Total Loss = CrossEntropyLoss + λ * sum(gates)
 ```
 
 Where:
-- CrossEntropyLoss ensures classification performance
-- The second term is the L1 norm of gate values
-- `λ` controls the trade-off between accuracy and sparsity
+- CrossEntropyLoss ensures classification performance  
+- The second term is the L1 norm of gate values  
+- `λ` controls the trade-off between accuracy and sparsity  
 
 This encourages the network to drive unnecessary gates toward zero.
 
@@ -50,8 +52,8 @@ This encourages the network to drive unnecessary gates toward zero.
 The model uses a hybrid architecture:
 
 - Convolutional layers for feature extraction  
-- Custom prunable linear layers for classification and sparsity learning
-- The prunable layers introduce learnable gates that dynamically suppress unimportant connections during training.
+- Custom prunable linear layers for classification and sparsity learning  
+- The prunable layers introduce learnable gates that dynamically suppress unimportant connections during training  
 
 ```
 Input (32×32×3)
@@ -70,7 +72,6 @@ Output (10 classes)
 ![Architecture](https://github.com/user-attachments/assets/d8b7ad50-8035-40db-8365-104731ded272)
 *Figure: Model architecture showing convolutional backbone and prunable layers.*
 
-
 ---
 
 ## Experimental Setup
@@ -81,51 +82,80 @@ Output (10 classes)
 
 Evaluation Metrics:
 - Test Accuracy  
-- Sparsity Level (percentage of gates below threshold)
+- Sparsity Level (percentage of gates below threshold)  
+
+### Sparsity Definition
+
+Sparsity is defined as the percentage of connections whose gate values fall below a threshold (1e-2):
+
+```
+Sparsity (%) = (Number of gates < 0.01 / Total gates) × 100
+```
+
+This threshold identifies connections that contribute negligibly to the output.
 
 ---
 
 ## Results
 
-| Lambda | Accuracy | Sparsity |
-|--------|---------|----------|
-| 1e-6   | 76.11%  | 34.68%   |
-| 5e-6   | 75.47%  | 43.66%   |
-| 1e-5   | 73.25%  | 45.23%   |
+| Lambda | Accuracy (%) | Sparsity (%) |
+|--------|-------------|--------------|
+| 1e-6   | 76.28       | 35.06        |
+| 5e-6   | 75.34       | 43.69        |
+| 1e-5   | 75.24       | 50.67        |
+| 1e-4   | 73.11       | 62.59        |
+| 1e-3   | 69.17       | 77.16        |
+| 5e-3   | 67.17       | 81.31        |
 
-The best-performing model (λ = 1e-6) achieves 76.11% accuracy while pruning 34.68% of parameters.
+These results demonstrate a clear and consistent sparsity–accuracy trade-off across a wide range of λ values.
 
-<img width="669" height="568" alt="image" src="https://github.com/user-attachments/assets/093d3b48-c4a2-461b-a1e1-4efd81d74467" />
+### Key Observations
 
-The trade-off curve shows a gradual decline in accuracy as sparsity increases, indicating that moderate pruning does not significantly harm performance.
+- Increasing λ steadily increases sparsity, confirming that the regularization term effectively suppresses connections  
+- Accuracy degrades gradually rather than abruptly, indicating that a large portion of parameters are redundant  
+- The model remains relatively stable up to ~50–60% sparsity before sharper accuracy degradation  
 
+### Best Trade-off
 
+- **λ = 1e-6 → Highest accuracy (76.28%)**
+- **λ = 1e-5 → Balanced trade-off (~50% sparsity with minimal accuracy drop)**
+
+This shows that nearly **half of the network connections can be removed** with only a small reduction in performance.
+
+![Tradeoff](https://github.com/user-attachments/assets/3d90df7e-c37c-4cee-b3cd-768b80ffe73a)
+*Figure: Accuracy vs Sparsity trade-off across different λ values.*
 ---
 
 ## Analysis
 
-- Increasing λ leads to higher sparsity but reduced accuracy  
-- Moderate values of λ provide the best trade-off  
-- The model removes approximately 40–45% of connections with minimal accuracy loss  
-- Beyond a certain point, sparsity gains plateau while accuracy degrades more significantly  
+- The sparsity–accuracy trade-off follows a smooth and predictable trend  
+- Low λ values preserve accuracy but result in limited pruning  
+- Moderate λ values (1e-5 to 1e-4) provide the best balance between efficiency and performance  
+- High λ values (>1e-3) lead to aggressive pruning (>75%), but at a noticeable cost to accuracy  
 
+A key observation is that:
+- Up to ~50% sparsity, the model retains most of its predictive capability  
+- Beyond ~60–70% sparsity, accuracy degradation becomes more pronounced  
+
+This confirms that dense layers contain significant redundancy and can be compressed effectively using learned gating mechanisms.
 ---
 
 ## Gate Behavior
 
-The distribution of gate values shows:
+The distribution of gate values reveals how the model learns sparsity:
 
-- A concentration near zero, representing pruned connections  
-- A smaller subset of gates remaining active, representing important weights  
+- A large spike near zero indicates that many connections are effectively suppressed  
+- A smaller distribution away from zero represents important retained weights  
 
-This distribution indicates effective sparsification:
-- A dominant spike near zero shows a large number of connections have been suppressed
-- A secondary distribution away from zero corresponds to important retained weights
+This behavior is a direct consequence of the L1 penalty:
 
-This bimodal pattern confirms that the model learns structured sparsity rather than uniformly shrinking weights.
+- The L1 term encourages many gates to shrink toward zero  
+- Important connections resist this penalty and remain active  
 
-<img width="752" height="565" alt="image" src="https://github.com/user-attachments/assets/4a19dc5c-6c5f-42b6-83ed-0cd10914374f" />
+This results in a **bimodal distribution**, demonstrating structured sparsity rather than uniform shrinkage.
 
+![Gates](https://github.com/user-attachments/assets/6f6739a0-a4d9-4e46-91c9-01c6cc16b307)
+*Figure: Gate value distribution showing pruned vs active connections.*
 
 ---
 
@@ -133,10 +163,10 @@ This bimodal pattern confirms that the model learns structured sparsity rather t
 
 - Dense layers contain a significant number of redundant parameters  
 - Sparsity can be introduced during training without post-processing  
-- Learned pruning is more flexible than static pruning methods  
+- Learned pruning is more adaptive than static pruning techniques
+- The model maintains strong performance even after removing over 50% of connections, highlighting substantial redundancy in dense layers  
 
 ---
-
 
 ## How to Run
 
@@ -159,7 +189,7 @@ This project is implemented as a notebook and can be run on Kaggle, Google Colab
 1. Upload the notebook (`self-pruning-neural-networks-layer.ipynb`) to Colab  
 2. Enable GPU:
    - Runtime → Change runtime type → GPU  
-3. Install required dependencies (if needed):
+3. Install dependencies (if needed):
 
 ```
 pip install torch torchvision
@@ -196,9 +226,10 @@ jupyter notebook
 ```
 .
 ├── self-pruning-neural-networks-layer.ipynb
-└── README.md
-
+├── README.md
+└── Report.md
 ```
+
 ---
 
 ## Future Work
@@ -209,3 +240,8 @@ jupyter notebook
 - Compare with magnitude-based pruning methods  
 
 ---
+
+## Author
+
+Arfath  
+AI/ML Engineering Student
